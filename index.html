@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>FiveM Interactive Map</title>
+    <link rel="icon" type="image/x-icon" href="fivem.ico">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="initial-menu">
+    <div id="home" class="home">
+        <div class="hero">
+            <div class="eyebrow">CUSTOM MAP TOOL</div>
+            <h1>FiveM <span>Interactive Map</span></h1>
+            <p>Create custom maps with checkpoints for quests, hidden locations, collectibles, and more. Save your maps and share them with others.</p>
+            <div class="choices"><button id="previewBtn" class="choice"><span>◉</span><strong>Preview
+                        Only</strong><small>Explore the empty map of Los Santos.</small></button><button id="createBtn"
+                    class="choice"><span>✚</span><strong>Create Locations</strong><small>Place and customize up to 500
+                        checkpoints.</small></button><button id="uploadBtn" class="choice"><span>⇧</span><strong>Upload
+                        File</strong><small>Open an existing map. View a shared map and track progress.</small></button></div>
+            <p class="hint">No account. No server. Your files stay on your device.</p>
+            <div class="creator-signature" aria-label="Created by Sica12"><span class="signature-line"></span><span
+                    class="signature-label"></span>build #1 · ver 1.2.0<strong>Sica12</strong>© 2026<span
+                    class="signature-line"></span>
+            </div>
+        </div>
+    </div>
+    <div id="workspace" class="workspace hidden">
+        <header class="topbar">
+            <div class="brand">FiveM <span>Interactive Map</span></div><input id="mapTitle" maxlength="100"
+                aria-label="Map title" placeholder="Untitled Map" value="Untitled Map">
+            <div class="top-actions">
+                <div class="background-picker"><span>Background</span>
+                    <div class="background-options" role="group" aria-label="Map background"><button type="button"
+                            class="bg-option" data-color="#080a0b" title="Black"
+                            aria-label="Black background"></button><button type="button" class="bg-option"
+                            data-color="#f1f4f5" title="White" aria-label="White background"></button><button
+                            type="button" class="bg-option" data-color="#334550" title="Ocean blue"
+                            aria-label="Ocean blue background"></button><button type="button" class="bg-option"
+                            data-color="#777f84" title="Gray" aria-label="Gray background"></button></div>
+                </div><button id="editMapBtn" class="primary hidden">✎ Edit Map</button><button id="lockBtn"
+                    title="Toggle lock">🔓 Lock Mode</button><button id="exportBtn" class="primary">↓ Create
+                    File</button><button id="homeBtn">⌂ Home</button>
+            </div>
+        </header>
+        <main class="main">
+            <aside class="sidebar" id="sidebar">
+                <div class="sidehead">
+                    <h2>Checkpoints</h2><span id="count">0 / 500</span><span id="progressCount"
+                        class="progress-count hidden"></span><span id="draftStatus" class="draft-status hidden">●
+                        Autosaved locally</span><button id="hideSidebar" title="Hide checkpoints">‹ Hide</button>
+                </div>
+                <div class="search-wrap"><input id="search" placeholder="Search checkpoints…"
+                        aria-label="Search checkpoints"></div>
+                <div id="pointList" class="point-list">
+                    <p class="empty">No checkpoints yet.</p>
+                </div>
+                <div class="sidebottom"><button id="undoBtn">↶ Undo</button><button id="clearBtn">Clear All</button>
+                </div>
+            </aside>
+            <section class="map-area"><button id="showSidebar" class="sidebar-reveal hidden">☰ Show Checkpoints</button>
+                <div id="map"></div>
+                <div class="map-hint" id="mapHint">Click anywhere on the map to add a checkpoint</div>
+                <div class="map-tools"><button id="fitBtn" title="Fit map">⛶ Fit Map</button></div>
+            </section>
+        </main>
+    </div>
+    <input type="file" id="fileInput" accept=".txt,.json,text/plain,application/json" hidden>
+    <dialog id="pointDialog">
+        <form id="pointForm" class="dialog-body">
+            <h2 id="dialogHeading">Add checkpoint?</h2>
+            <p id="dialogSub">Are you sure you want to place a checkpoint here?</p><label
+                for="pointName">Name</label><input id="pointName" maxlength="80" required><label
+                for="pointDescription">Description <span class="muted">(optional)</span></label><textarea
+                id="pointDescription" maxlength="500" rows="3"
+                placeholder="Notes about this location…"></textarea><label for="pointColor">Checkpoint color</label>
+            <div class="colorline"><input id="pointColor" type="color" value="#ff5252">
+                <div id="swatches" class="swatches"></div>
+            </div>
+            <div class="dialog-actions"><button type="button" id="deletePoint"
+                    class="danger hidden">Delete</button><button type="button" id="cancelPoint">Cancel</button><button
+                    type="submit" class="primary" id="savePoint">Confirm Location</button></div>
+        </form>
+    </dialog>
+    <div id="checkpointMenu" class="checkpoint-menu hidden"><button id="menuEdit">✎ Edit</button><button id="menuDelete"
+            class="danger">⌫ Delete</button></div>
+    <dialog id="draftResumeDialog">
+        <div class="dialog-body">
+            <h2>Continue creating this map?</h2>
+            <p>You have an unfinished map saved on this device.</p>
+            <div class="resume-title" id="draftResumeTitle"></div>
+            <p class="muted" id="draftResumeCount"></p>
+            <div class="dialog-actions"><button type="button" id="draftResumeCancel">Cancel</button><button
+                    type="button" id="draftResumeNo">No, New Map</button><button type="button" class="primary"
+                    id="draftResumeYes">Yes, Continue</button></div>
+        </div>
+    </dialog>
+    <dialog id="resumeDialog">
+        <div class="dialog-body">
+            <h2>Continue previewing this map?</h2>
+            <p>You have a saved map preview on this device.</p>
+            <div class="resume-title" id="resumeTitle"></div>
+            <p id="resumeProgress" class="muted"></p>
+            <div class="dialog-actions"><button type="button" id="resumeNo">No, Upload File</button><button
+                    type="button" class="primary" id="resumeYes">Yes, Continue</button></div>
+        </div>
+    </dialog>
+    <dialog id="exportDialog">
+        <form id="exportForm" class="dialog-body">
+            <h2>Create Map File</h2>
+            <p>Choose a name for your TXT file.</p><label for="exportFilename">File name</label><input
+                id="exportFilename" maxlength="70" required placeholder="my-map">
+            <div class="dialog-actions"><button type="button" id="exportCancel">Cancel</button><button type="submit"
+                    class="primary">Confirm & Download</button></div>
+        </form>
+    </dialog>
+    <dialog id="confirmDialog">
+        <div class="dialog-body">
+            <h2 id="confirmHeading">Confirm</h2>
+            <p id="confirmMessage"></p>
+            <div class="dialog-actions"><button id="confirmCancel">Cancel</button><button id="confirmYes"
+                    class="danger">Confirm</button></div>
+        </div>
+    </dialog>
+    <div id="toast" role="status" aria-live="polite"></div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/checkpoints.js"></script>
+    <script src="js/file-manager.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>

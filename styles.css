@@ -67,7 +67,7 @@ dialog{background:#142119;border:1px solid var(--glass-border);border-radius:18p
 
 /* Home menu wallpaper only; workspace/map remain unchanged. */
 #home.home {
-  background: linear-gradient(180deg, rgba(5,12,8,.48), rgba(5,12,8,.78)), url("assets/background-menu.png") center center / cover no-repeat;
+  background: linear-gradient(180deg, rgba(5,12,8,.48), rgba(5,12,8,.78)), url("assets/background-menu.webp") center center / cover no-repeat;
   min-height: 100vh;
 }
 

@@ -1,7 +1,7 @@
 'use strict';
 window.MapView = (() => {
   const WIDTH=1419, HEIGHT=2048;
-  const paths={default:'assets/gta_5_map.png'};
+  const paths={default:'assets/gta_5_map.webp'};
   let map,overlay,style='default',markers=new Map(),clickHandler=null;
   const bounds=[[0,0],[HEIGHT,WIDTH]];
   function init(onClick){clickHandler=onClick;map=L.map('map',{crs:L.CRS.Simple,minZoom:-3,maxZoom:3,zoomSnap:.25,zoomDelta:.5,attributionControl:false,zoomControl:true});overlay=L.imageOverlay(paths[style],bounds,{interactive:false}).addTo(map);map.fitBounds(bounds);map.setMaxBounds([[-HEIGHT*.35,-WIDTH*.35],[HEIGHT*1.35,WIDTH*1.35]]);map.on('click',e=>clickHandler?.(e.latlng));}
